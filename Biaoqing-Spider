@@ -1,0 +1,32 @@
+import requests
+from lxml import etree
+import time
+import re
+for i in range(1,201):
+    link='https://www.fabiaoqing.com/biaoqing/lists/page/'+str(i)+'.html'
+    res=requests.get(link)
+    html=etree.HTML(res.text)
+    links_gif=html.xpath('//div[@class="tagbqppdiv"]/a/img/@data-original')
+    titles_gif=html.xpath('//div[@class="tagbqppdiv"]/a/img/@title')
+    names_gif=[]
+    #对图片名字进行处理，提取汉字信息,把超过256个字的截取部分
+    for title in titles_gif:
+        parttern = '[\u4E00-\u9FA5]'
+        r = re.compile(parttern).findall(title)
+        name_gif = ''.join(r)
+        if len(name_gif)>=100:
+            names_gif.append(name_gif[0:100])
+        else:
+            names_gif.append(name_gif)
+     #处理图片名字后缀
+    names_idex=[]
+    for each in links_gif:
+        names_idex.append(each.split('.')[-1])
+    #拼接图片名字
+    # names=[]
+    for one in range(len(names_gif)):
+        with open('E:\\表情\\'+(names_gif[one]+'.'+names_idex[one]),'wb') as f:
+            picture = requests.get(links_gif[one]).content
+            f.write(picture)
+            print('正在下载第'+str(i)+'页'+'第'+str(one+1)+'个')
+    time.sleep(2)
